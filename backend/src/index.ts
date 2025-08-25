@@ -1,17 +1,14 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-import { PrismaClient } from "@prisma/client";
+import app from "./app";
+import { v2 as cloudinary } from "cloudinary";
 
-dotenv.config();
-const app = express();
-const prisma = new PrismaClient();
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
 
-app.get("/health", (req, res) => res.send("Backend is running!"));
-
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

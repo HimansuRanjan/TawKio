@@ -13,17 +13,91 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  password String
-  posts    Post[]
+  id            String   @id @default(uuid())
+  username      String   @unique
+  email         String   @unique
+  password      String
+  bio           String?
+  avatarId      String?
+  avatarUrl     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  //for reset password purpose
+  resetPasswordToken   String? 
+  resetPasswordExpire  DateTime?
+
+  // Relations with cascade deletes
+  posts         Post[]        
+  comments      Comment[]       
+  likes         Like[]          
+  messages      Message[]       @relation("UserMessages")
+  conversations Conversation[]  @relation("UserConversations")
 }
 
 model Post {
-  id        Int    @id @default(autoincrement())
-  title     String
+  id        String   @id @default(uuid())
+  content   String?
+  imageId   String
+  imageUrl  String
+  linkUrl   String?
+  createdAt DateTime @default(now())
+
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  comments  Comment[] 
+  likes     Like[] 
+}
+
+model Comment {
+  id        String   @id @default(uuid())
   content   String
-  user      User   @relation(fields: [userId], references: [id])
-  userId    Int
+  createdAt DateTime @default(now())
+
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id        String   @id @default(uuid())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Conversation {
+  id        String      @id @default(uuid())
+  createdAt DateTime    @default(now())
+
+  participants User[]   @relation("UserConversations")
+  messages     Message[]
+}
+
+model Message {
+  id             String      @id @default(uuid())
+  content        String?
+  type           MessageType @default(TEXT)
+  createdAt      DateTime    @default(now())
+
+  senderId       String
+  sender         User        @relation("UserMessages", fields: [senderId], references: [id], onDelete: SetNull)
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  CALL
 }
