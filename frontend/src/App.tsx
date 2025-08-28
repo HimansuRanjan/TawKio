@@ -1,14 +1,38 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css';
+import HomePage from './pages/HomePage'
+import Login from './pages/Login'
+import UpdateProfile from './pages/UpdateProfile'
+import UpdatePassword from './pages/UpdatePassword'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import ViewPostComment from './pages/ViewPostComment'
+import Profile from './pages/Profile';
+import HomeFeed from './pages/HomeFeed';
 
 function App() {
-  const [msg, setMsg] = useState("");
+  return (
+    <>
+     <Router>
+      <Routes>
+        <Route path='/' element={<HomePage/>}/>
+        <Route path='/feed' element={<HomeFeed/>}/>
+        <Route path='/profile' element={<Profile/>}/>
+        <Route path='/login' element={<Login/>}/>
+        <Route path='/view/post/:id' element={<ViewPostComment/>}/>
+        <Route path='/update/profile' element={<UpdateProfile/>}/>
+        <Route path='/update/password' element={<UpdatePassword/>}/>
+        <Route path='/password/forgot' element={<ForgotPassword/>}/>
+        <Route path='/password/reset/:token' element={<ResetPassword/>}/>
 
-  useEffect(() => {
-    axios.get("http://localhost:5000/health").then(res => setMsg(res.data));
-  }, []);
+      </Routes>
+     </Router>
 
-  return <h1 className="text-2xl text-red-600">{msg}</h1>;
+     <ToastContainer position='bottom-right' theme='dark'/>
+    </>
+  )
 }
 
-export default App;
+export default App
