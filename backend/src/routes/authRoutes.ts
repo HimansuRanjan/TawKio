@@ -20,7 +20,7 @@ const router = express.Router();
 // ========================
 
 // Register
-router.post("/register", registerUser);
+router.post("/signup", registerUser);
 
 // Login
 router.post("/login", loginUser);
@@ -37,7 +37,7 @@ router.post("/reset-password/:token", resetPassword);
 router.use(isAuthenticated); // All routes below require JWT
 
 // Logout
-router.post("/logout", logoutUser);
+router.get("/logout", logoutUser);
 
 // Get current logged-in user
 router.get("/me", getUser);

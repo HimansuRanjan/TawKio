@@ -7,6 +7,7 @@ import {
   getPostById,
   updatePost,
   deletePost,
+  getPostsByUser
 } from "../controllers/postControllers";
 
 const router = express.Router();
@@ -15,13 +16,16 @@ const router = express.Router();
 router.use(isAuthenticated);
 
 // Create a new post (text/image/link)
-router.post("/", createPost);
+router.post("/new", createPost);
 
 // Get all posts (feed, paginated)
-router.get("/", getAllPosts);
+router.get("/all", getAllPosts);
 
 // Get a single post by ID
 router.get("/:id", getPostById);
+
+// Get all posts of a singleuser
+router.get("/user/:id", getPostsByUser);
 
 // Update a post by ID
 router.put("/:id", updatePost);

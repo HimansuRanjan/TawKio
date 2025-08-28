@@ -1,8 +1,10 @@
 import { user } from "@prisma/client";
 import { Request } from "express";
+import { FileArray } from "express-fileupload";
 
 export interface AuthenticatedRequest extends Request {
   user?: user;
+  files?: FileArray | null | undefined;
 }
 
 export interface userType{

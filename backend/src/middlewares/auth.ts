@@ -22,6 +22,7 @@ export const isAuthenticated = catchAsyncErrors(async (req:AuthenticatedRequest,
         email: true,
         avatarId: true,
         avatarUrl: true,
+        bio: true,
         // exclude password and reset fields
       },
     });

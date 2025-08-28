@@ -2,7 +2,6 @@
 import { Request, Response, NextFunction } from "express";
 import prisma from "../config/db";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { catchAsyncErrors } from "../middlewares/catchAsyncError";
 import ErrorHandler from "../middlewares/error";
 import {
@@ -20,6 +19,7 @@ import { v2 as cloudinary } from "cloudinary";
 import crypto from 'crypto';
 import { generateResetToken } from "../utils/generateResetToken";
 import { sendEmail } from "../utils/sendEmail";
+import { UploadedFile } from "express-fileupload";
 
 
 
@@ -29,7 +29,7 @@ export const registerUser = catchAsyncErrors(
     const parseResult = registerSchema.safeParse(req.body);
 
     if (!parseResult.success) {
-      return next(new ErrorHandler(`${parseResult.error.flatten()}`, 400));
+      return next(new ErrorHandler(parseResult.error.message, 400));
     }
 
     const { username, email, password } = parseResult.data;
@@ -121,7 +121,7 @@ export const updateProfile = catchAsyncErrors(
 
     // Avatar Handling
     if (req.files && req.files.avatar) {
-      const avatar = req.files.avatar as any;
+      const avatar = req.files.avatar as UploadedFile;
       if (existingUser.avatarId) {
         await cloudinary.uploader.destroy(existingUser.avatarId);
       }
@@ -179,7 +179,7 @@ export const changePassword = catchAsyncErrors(
     const parsed = changePasswordSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      return next(new ErrorHandler(`${parsed.error}`, 400));
+      return next(new ErrorHandler(parsed.error.message, 400));
     }
 
     const { currentPassword, newPassword } = parsed.data;
@@ -306,35 +306,44 @@ export const resetPassword = catchAsyncErrors(
 // ✅ Delete User
 export const deleteUser = catchAsyncErrors(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return next(new ErrorHandler("Request body is required", 400));
+    }
+
     const parsed = deleteUserSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      return next(new ErrorHandler(parsed.error.flatten().formErrors.join(", "), 400));
+      return next(new ErrorHandler(
+        parsed.error.flatten().formErrors.join(", "), 
+        400
+      ));
     }
 
     const { username } = parsed.data;
-
     const userId = req.user?.id;
 
-    // Fetch user to validate username
     const user = await prisma.user.findUnique({ where: { id: userId } });
-
-    if (!user) {
-      return next(new ErrorHandler("User not found", 404));
-    }
+    if (!user) return next(new ErrorHandler("User not found", 404));
 
     if (user.username !== username) {
       return next(new ErrorHandler("Username does not match", 400));
     }
 
-    // Delete user (Prisma cascade will remove posts, comments, likes)
-    await prisma.user.delete({
-      where: { id: userId },
-    });
 
-    res.status(200).json({
-      success: true,
-      message: "Your account and all related data have been permanently deleted!",
-    });
+
+    await prisma.user.delete({ where: { id: userId } });
+
+    res
+      .status(200)
+      .cookie("token", "", {
+        expires: new Date(Date.now()),
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+      })
+      .json({ 
+        success: true, 
+        message: "Your account and all related data have been permanently deleted!" 
+      });
   }
 );

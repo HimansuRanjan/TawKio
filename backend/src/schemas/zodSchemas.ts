@@ -53,7 +53,10 @@ export const resetPasswordSchema = z.object({
 
 // ✅ Reset Password
 export const deleteUserSchema = z.object({
-  username: z.string().min(8, "Username is required to confirm deletion"),
+  username: z
+    .string()
+    .min(1, "Username cannot be empty")
+    .min(8, "Username must be at least 8 characters"),
 });
 
 ////////// Validation for Posts

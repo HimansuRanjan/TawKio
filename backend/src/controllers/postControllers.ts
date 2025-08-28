@@ -95,6 +95,39 @@ export const getPostById = catchAsyncErrors(
   }
 );
 
+// GET POST BY ID
+export const getPostsByUser = catchAsyncErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params; // userId from params
+
+    if (!id) {
+      return next(new ErrorHandler("User ID is required", 400));
+    }
+
+    const posts = await prisma.post.findMany({
+      where: { authorId: id }, // 👈 filter by userId
+      include: {
+        author: { select: { id: true, username: true, avatarUrl: true } },
+        comments: {
+          include: {
+            author: { select: { id: true, username: true, avatarUrl: true } },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+        likes: true,
+      },
+      orderBy: { createdAt: "desc" }, // 👈 latest first
+    });
+
+    if (!posts || posts.length === 0) {
+      return next(new ErrorHandler("No posts found for this user", 404));
+    }
+
+    res.status(200).json({ success: true, posts });
+  }
+);
+
+
 // UPDATE POST
 export const updatePost = catchAsyncErrors(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -112,6 +145,10 @@ export const updatePost = catchAsyncErrors(
 
     const existingPost = await prisma.post.findUnique({ where: { id } });
     if (!existingPost) return next(new ErrorHandler("Post not found", 404));
+
+    if(existingPost.authorId !== req.user.id){
+      return next(new ErrorHandler("You don't have Permission to Update it!", 404));
+    }
 
     // Handle image update
     let imageId = existingPost.imageId;
@@ -154,6 +191,10 @@ export const deletePost = catchAsyncErrors(
 
     const existingPost = await prisma.post.findUnique({ where: { id } });
     if (!existingPost) return next(new ErrorHandler("Post not found", 404));
+
+    if(existingPost.authorId !== req.user.id){
+      return next(new ErrorHandler("You don't have Permission to Delete it!", 404));
+    }
 
     if (existingPost.imageId)
       await cloudinary.uploader.destroy(existingPost.imageId);
