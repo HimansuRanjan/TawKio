@@ -6,8 +6,9 @@ import { errorMiddleware } from "./middlewares/error";
 import fileUpload from "express-fileupload";
 
 import userRoutes from "./routes/authRoutes";
-// import postRoutes from "./routes/postRoutes";
-// import commentRoutes from "./routes/commentRoutes";
+import postRoutes from "./routes/postRoutes";
+import commentRoutes from "./routes/commentRoutes";
+import likeRoutes from "./routes/likeRoutes";
 
 dotenv.config();
 
@@ -23,8 +24,9 @@ app.use(fileUpload({
 );
 
 app.use("/v.1/api/user", userRoutes);
-// app.use("/v.1/api/post", postRoutes);
-// app.use("/v.1/api/comment", commentRoutes);
+app.use("/v.1/api/post", postRoutes);
+app.use("/v.1/api/comment", commentRoutes);
+app.use("/v.1/api/like", likeRoutes);
 
 app.use(errorMiddleware);
 

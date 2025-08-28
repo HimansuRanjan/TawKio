@@ -8,11 +8,13 @@ export const registerSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
+
 // Login Schema
 export const loginSchema = z.object({
   email: z.string().email("Invalid email"),
   password: z.string().min(8, "Password required"),
 });
+
 
 // ✅ Update Profile
 export const updateProfileSchema = z.object({
@@ -20,6 +22,7 @@ export const updateProfileSchema = z.object({
   email: z.string().email("Invalid email format").optional(),
   bio: z.string().max(200, "About Me should not exceed 200 characters").optional(),
 });
+
 
 // ✅ Change Password
 export const changePasswordSchema = z.object({
@@ -31,10 +34,12 @@ export const changePasswordSchema = z.object({
   path: ["confirmNewPassword"],
 });
 
+
 // ✅ Forgot Password
 export const forgotPasswordSchema = z.object({
   email: z.string().email("Please provide a valid email"),
 });
+
 
 // ✅ Reset Password
 export const resetPasswordSchema = z.object({
@@ -51,12 +56,15 @@ export const deleteUserSchema = z.object({
   username: z.string().min(8, "Username is required to confirm deletion"),
 });
 
-// ✅ Post Schema
-export const createPostSchema = z.object({
+////////// Validation for Posts
+
+// Create & update Post Schema
+export const createUpdatePostSchema = z.object({
   content: z.string().optional(),
-  imageUrl: z.string().url(),
   linkUrl: z.string().url().optional(),
 });
+
+
 
 // ✅ Comment Schema
 export const createCommentSchema = z.object({
