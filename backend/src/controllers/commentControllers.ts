@@ -67,7 +67,7 @@ export const deleteComment = catchAsyncErrors(
     const { id } = req.params;
     
     if(!id){
-        return new ErrorHandler("Post ID Not Found", 404);
+        return new ErrorHandler("Comment ID Not Found", 404);
     }
     
     const existingComment = await prisma.comment.findUnique({
@@ -82,6 +82,8 @@ export const deleteComment = catchAsyncErrors(
     if (existingComment.authorId !== req.user!.id) {
       return next(new ErrorHandler("Not authorized to delete this comment", 403));
     }
+
+    //Post Author can also delete: TODO
 
     await prisma.comment.delete({ where: { id } });
 

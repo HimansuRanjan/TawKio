@@ -8,6 +8,6 @@ const router = express.Router();
 router.use(isAuthenticated);
 
 // Toggle like/unlike
-router.post("/posts/:id/like", toggleLike);
+router.post("/post/:id", toggleLike);
 
 export default router;

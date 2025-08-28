@@ -30,7 +30,7 @@ export const toggleLike = catchAsyncErrors(
       await prisma.like.delete({ where: { id: existingLike.id } });
       return res
         .status(200)
-        .json({ success: true, message: "Post unliked", liked: false });
+        .json({ success: true, message: "Post Unliked ❌", liked: false });
     } else {
       // Like
       const like = await prisma.like.create({
@@ -41,7 +41,7 @@ export const toggleLike = catchAsyncErrors(
       });
       return res
         .status(201)
-        .json({ success: true, message: "Post liked", liked: true, like });
+        .json({ success: true, message: "Post Liked ✅", liked: true, like });
     }
   }
 );

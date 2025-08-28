@@ -15,9 +15,9 @@ router.use(isAuthenticated);
 router.post("/posts/:id/comments", createComment);
 
 // Get all comments for a post
-router.get("/posts/:id/comments", getPostComments);
+// router.get("/posts/:id/comments", getPostComments);
 
 // Delete a comment by ID
-router.delete("/comments/:id", deleteComment);
+router.delete("/delete/:id", deleteComment);
 
 export default router;
