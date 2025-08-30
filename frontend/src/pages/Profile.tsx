@@ -1,27 +1,23 @@
+import { AppDispatch, RootState } from "@/store/store";
 import Navbar from "./sub-components/Navbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { getPostsByUser } from "@/store/slices/postSlice";
 
 export default function Profile() {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const navigate = useNavigate();
 
-  // Dummy user (replace with real data from API later)
-  const user = {
-    name: "Himansu Ranjan Patra",
-    bio: "Building TawKio 🚀 | MERN & Postgres Dev",
-    avatar: "banner.png",
-  };
+  const dispatch = useDispatch<AppDispatch>();
+  const { user } = useSelector((state: RootState) => state.user);
+  const { posts } = useSelector((state: RootState) => state.post);
 
-  // Dummy posts (replace with backend data)
-  const posts = [
-    { id: 1, image: "banner.png" },
-    { id: 2, image: "banner.png" },
-    { id: 3, image: "banner.png" },
-    { id: 4, image: "banner.png" },
-    { id: 5, image: "banner.png" },
-    { id: 6, image: "banner.png" },
-  ];
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(getPostsByUser(user.id));
+    }
+  }, [user?.id, dispatch]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -31,13 +27,15 @@ export default function Profile() {
         {/* Profile Header */}
         <div className="flex items-center gap-6 mb-8">
           <img
-            src={user.avatar}
-            alt={user.name}
+            src={user.avatarUrl}
+            alt={user.username}
             className="w-28 h-28 rounded-full object-cover cursor-pointer"
             onClick={() => setShowAvatarModal(true)}
           />
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              {user.username}
+            </h2>
             <p className="text-gray-600 mt-2">{user.bio}</p>
           </div>
         </div>
@@ -47,7 +45,7 @@ export default function Profile() {
           {posts.map((post) => (
             <img
               key={post.id}
-              src={post.image}
+              src={post.imageUrl || "banner.png"}
               alt="Post"
               className="w-full h-40 object-cover cursor-pointer hover:opacity-90"
               onClick={() => navigate(`/view/post/${post.id}`)}
@@ -76,8 +74,8 @@ export default function Profile() {
 
             {/* Enlarged Avatar */}
             <img
-              src={user.avatar}
-              alt={user.name}
+              src={user.avatarUrl}
+              alt={user.username}
               className="max-w-[90vw] max-h-[80vh] rounded-lg object-contain"
             />
           </div>

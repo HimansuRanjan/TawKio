@@ -1,5 +1,15 @@
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Navbar from "./sub-components/Navbar";
-import { useState } from "react";
+import { AppDispatch, RootState } from "@/store/store";
+import {
+  clearAllUserErrors,
+  resetProfile,
+  updateProfile,
+} from "@/store/slices/userSlice";
+import { toast } from "react-toastify";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function UpdateProfile() {
   const [name, setName] = useState("");
@@ -7,21 +17,48 @@ export default function UpdateProfile() {
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState<File | null>(null);
 
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error, message, isUpdated, user } = useSelector(
+    (state: RootState) => state.user
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Create form data (in case avatar file needs upload)
     const formData = new FormData();
-    formData.append("name", name);
+    formData.append("username", name);
     formData.append("email", email);
     formData.append("bio", bio);
     if (avatar) {
       formData.append("avatar", avatar);
     }
 
-    // TODO: Send to backend (API call)
-    console.log("Update Profile Data:", { name, email, bio, avatar });
+    console.log(formData);
+
+    dispatch(updateProfile(formData)); // avatar handled by backend if required
   };
+
+  // ✅ Handle success & errors
+  useEffect(() => {
+    if(user){
+      setName(user.username || "");
+      setEmail(user.email || "");
+      setBio(user.bio || "");
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(clearAllUserErrors());
+    }
+    if (isUpdated) {
+      toast.success(message);
+      dispatch(resetProfile());
+    }
+    return () => {
+      if (avatar) {
+        URL.revokeObjectURL(URL.createObjectURL(avatar));
+      }
+    };
+  }, [error, message, isUpdated, loading, avatar,user]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -36,12 +73,13 @@ export default function UpdateProfile() {
             <label className="block text-sm font-medium text-gray-700">
               Name
             </label>
-            <input
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-300 p-2 focus:border-violet-500 focus:ring-violet-500"
               required
+              autoComplete="name"
             />
           </div>
 
@@ -50,12 +88,13 @@ export default function UpdateProfile() {
             <label className="block text-sm font-medium text-gray-700">
               Email
             </label>
-            <input
+            <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-300 p-2 focus:border-violet-500 focus:ring-violet-500"
               required
+              autoComplete="email"
             />
           </div>
 
@@ -64,7 +103,7 @@ export default function UpdateProfile() {
             <label className="block text-sm font-medium text-gray-700">
               Bio
             </label>
-            <textarea
+            <Textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={3}
@@ -78,26 +117,43 @@ export default function UpdateProfile() {
             <label className="block text-sm font-medium text-gray-700">
               Avatar Image
             </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                setAvatar(e.target.files ? e.target.files[0] : null)
-              }
-              className="mt-1 block w-full text-sm text-gray-500"
-            />
+
+            {/* Preview container */}
+            <div className="mt-3 flex flex-col gap-3">
+              <div className="w-full max-h-80 overflow-hidden rounded-lg border">
+                <img
+                  src={
+                    avatar
+                      ? URL.createObjectURL(avatar) // show uploaded preview
+                      : user?.avatarUrl || "/default-avatar.png" // fallback to current user avatar
+                  }
+                  alt="Avatar Preview"
+                  className="w-full h-auto object-contain"
+                />
+              </div>
+
+              {/* File upload input */}
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  setAvatar(e.target.files ? e.target.files[0] : null)
+                }
+                className="text-sm text-gray-500"
+              />
+            </div>
           </div>
 
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-violet-700 text-white py-2 px-4 rounded-lg hover:bg-violet-800 transition"
+            disabled={loading}
+            className="w-full bg-violet-700 text-white py-2 px-4 rounded-lg hover:bg-violet-800 transition disabled:opacity-50"
           >
-            Update Profile
+            {loading ? "Updating..." : "Update Profile"}
           </button>
         </form>
       </div>
     </div>
   );
 }
-

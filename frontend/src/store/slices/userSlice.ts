@@ -2,17 +2,55 @@ import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { AppDispatch } from "../store";
 
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  bio: string;
+  avatarId?: string;
+  avatarUrl?: string;
+}
+
+interface UserState {
+  loading: boolean;
+  user: Partial<User>;   // ✅ allows empty {} initially
+  isAuthenticated: boolean;
+  error: string | null;
+  message: string | null;
+  isUpdated: boolean;
+}
+
+const initialState: UserState = {
+  loading: false,
+  user: {},              // empty at start but typed as Partial<User>
+  isAuthenticated: false,
+  error: null,
+  message: null,
+  isUpdated: false,
+};
+
 const userSlice = createSlice({
   name: "user",
-  initialState: {
-    loading: false,
-    user: {},
-    isAuthenticated: false,
-    error: null,
-    message: null,
-    isUpdated: false,
-  },
+  initialState,
   reducers: {
+    signUpRequest(state) {
+      state.loading = true;
+      state.isAuthenticated = false;
+      state.user = {};
+      state.error = null;
+    },
+    signUpSuccess(state, action) {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.user = action.payload;
+      state.error = null;
+    },
+    signUpFailed(state, action) {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.user = {};
+      state.error = action.payload;
+    },
     loginRequest(state) {
       state.loading = true;
       state.isAuthenticated = false;
@@ -95,7 +133,8 @@ const userSlice = createSlice({
     updateProfileSuccess(state, action) {
       state.loading = false;
       state.isUpdated = true;
-      state.message = action.payload;
+      state.message = action.payload.message;
+      state.user = action.payload.user;
       state.error = null;
     },
     updateProfileFailed(state, action) {
@@ -111,6 +150,24 @@ const userSlice = createSlice({
     },
   },
 });
+
+export const signUp = (username:string, email: String, password: String) => async (dispatch: AppDispatch): Promise<void> => {
+    dispatch(userSlice.actions.signUpRequest());
+    try {
+        const { data } = await axios.post("http://localhost:4000/v.1/api/user/signup",
+            {username, email, password},
+            {
+                'withCredentials': true,
+                headers: {'Content-Type': 'application/json'}
+            }
+        );
+        dispatch(userSlice.actions.signUpSuccess(data.user));
+        dispatch(userSlice.actions.clearAllErrors());
+    } catch (error: any) {
+        const errorMessage = error?.response?.data?.message || "Something went wrong.";
+        dispatch(userSlice.actions.signUpFailed(errorMessage));
+    }
+}
 
 export const login = (email: String, password: String) => async (dispatch: AppDispatch): Promise<void> => {
     dispatch(userSlice.actions.loginRequest());
@@ -148,7 +205,7 @@ export const logout = () => async (dispatch: AppDispatch): Promise<void> =>{
 export const getUser = () => async (dispatch: AppDispatch): Promise<void> => {
   dispatch(userSlice.actions.loadUserRequest());
   try {
-    const { data } = await axios.get("http://localhost:4000/v.1/api/user/details", {
+    const { data } = await axios.get("http://localhost:4000/v.1/api/user/me", {
       withCredentials: true,
     });
     dispatch(userSlice.actions.loadUserSuccess(data.user));
@@ -160,30 +217,30 @@ export const getUser = () => async (dispatch: AppDispatch): Promise<void> => {
 
 
 export const updateProfile =
-  (username: string, email: string, aboutMe: string) => async (dispatch: AppDispatch): Promise<void> => {
-    dispatch(userSlice.actions.updateProfileRequest())
+  (formData: FormData) => async (dispatch: AppDispatch): Promise<void> => {
+    dispatch(userSlice.actions.updateProfileRequest());
     try {
-        const {data} = await axios.put("http://localhost:4000/v.1/api/user/update/me", {
-            username, email, aboutMe
-        },
-           {
-            withCredentials: true,
-            headers: {"Content-Type": "multipart/form-data"}
-           } 
-        );
-        dispatch(userSlice.actions.updateProfileSuccess(data.message));
-        dispatch(userSlice.actions.clearAllErrors())
+      const { data } = await axios.put(
+        "http://localhost:4000/v.1/api/user/me/update",
+        formData,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
+      dispatch(userSlice.actions.updateProfileSuccess(data));
+      dispatch(userSlice.actions.clearAllErrors());
     } catch (error: any) {
-        dispatch(userSlice.actions.updateProfileFailed(error.response.data.message));
+      dispatch(userSlice.actions.updateProfileFailed(error.response.data.message));
     }
-};
+  };
 
 export const chnagePassword =
   (currentPassword: string, newPassword: string, confirmNewPassword: string) => async (dispatch: AppDispatch): Promise<void> => {
     dispatch(userSlice.actions.updatePasswordRequest())
     try {
-        const {data} = await axios.put("http://localhost:4000/v.1/api/user/update/password", {currentPassword, newPassword, confirmNewPassword},
+        const {data} = await axios.put("http://localhost:4000/v.1/api/user/me/change-password", {currentPassword, newPassword, confirmNewPassword},
            {
             withCredentials: true,
             headers: {"Content-Type": "application/json"}

@@ -2,14 +2,33 @@ import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { AppDispatch } from "../store";
 
+interface Post {
+  id: string;
+  content: string;
+  imageUrl?: string | null;
+  linkUrl?: string | null;
+  comments: any[];
+  likes: any[];
+}
+
+interface PostState {
+  loading: boolean;
+  posts: Post[];  // ✅ typed array
+  postError: string | null;
+  message: string | null;
+}
+
+const initialState: PostState = {
+  loading: false,
+  posts: [],
+  postError: null,
+  message: null,
+};
+
+
 const postSlice = createSlice({
   name: "post",
-  initialState: {
-    loading: false,
-    posts: [],
-    postError: null,
-    message: null,
-  },
+  initialState,
   reducers: {
     getAllPostRequest(state) {
       state.loading = true;
@@ -128,6 +147,22 @@ export const getAllPosts = (pageToLoad: number, limit: number) => async (dispatc
         });
 
     dispatch(postSlice.actions.getAllPostSuccess(data.projects));
+    dispatch(postSlice.actions.clearAllErrors());  
+    } catch (error: any) {
+    dispatch(postSlice.actions.getAllPostFailed(error.response.data.message));    
+    }
+};
+
+export const getPostsByUser = (id:string) => async (dispatch:AppDispatch): Promise<void> => {
+    dispatch(postSlice.actions.getAllPostRequest());
+    try {
+        const { data } = await axios.get(`http://localhost:4000/v.1/api/post/user/${id}`,
+        {
+            // params: { page: pageToLoad, limit },
+            withCredentials: true
+        });
+
+    dispatch(postSlice.actions.getAllPostSuccess(data.posts));
     dispatch(postSlice.actions.clearAllErrors());  
     } catch (error: any) {
     dispatch(postSlice.actions.getAllPostFailed(error.response.data.message));    

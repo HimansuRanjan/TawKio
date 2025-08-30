@@ -1,4 +1,12 @@
-import { Home, MessageCircle, Bell, LogOut, User, Settings, Key } from "lucide-react";
+import {
+  Home,
+  MessageCircle,
+  Bell,
+  LogOut,
+  User,
+  Settings,
+  Key,
+} from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -8,6 +16,9 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { logout } from "../../store/slices/userSlice"; // ✅ make sure you have this
 
 interface NavbarProps {
   activeTab: string;
@@ -18,15 +29,24 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const dispatch = useDispatch<AppDispatch>();
+  const {user} = useSelector((state: RootState) => state.user );
+
   const handleNavClick = (tab: string, path: string) => {
     setActiveTab(tab);
     navigate(path);
   };
 
-  const handleLogout = () => {
-    // clear auth (token, localStorage, etc.)
-    console.log("User logged out");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      // 1. Clear Redux + localStorage via slice action
+      dispatch(logout());
+
+      // 2. Navigate to login
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -39,7 +59,7 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
         <button
           onClick={() => handleNavClick("home", "/feed")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
-            location.pathname === "/home"
+            location.pathname === "/feed"
               ? "bg-gray-200 text-violet-800 font-semibold"
               : "hover:bg-gray-100"
           }`}
@@ -48,7 +68,7 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
         </button>
 
         <button
-          onClick={() => handleNavClick("messages", "/feed")}
+          onClick={() => handleNavClick("messages", "/messages")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
             location.pathname === "/messages"
               ? "bg-gray-200 text-violet-800 font-semibold"
@@ -59,7 +79,7 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
         </button>
 
         <button
-          onClick={() => handleNavClick("notifications", "/feed")}
+          onClick={() => handleNavClick("notifications", "/notifications")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
             location.pathname === "/notifications"
               ? "bg-gray-200 text-violet-800 font-semibold"
@@ -74,25 +94,35 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
+            type="button"
             aria-label="Profile menu"
             className="rounded-full overflow-hidden w-10 h-10"
           >
             <Avatar>
-              <AvatarImage src="/avatars/me.png" alt="Profile" />
+              <AvatarImage src={user.avatarUrl} alt="Profile" />
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuItem onClick={() => navigate("/profile")} className="hover:cursor-pointer">
+          <DropdownMenuItem
+            onClick={() => navigate("/profile")}
+            className="hover:cursor-pointer"
+          >
             <User className="w-4 h-4 mr-2" />
             <span>My Profile</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate("/update/profile")} className="hover:cursor-pointer">
+          <DropdownMenuItem
+            onClick={() => navigate("/update/profile")}
+            className="hover:cursor-pointer"
+          >
             <Settings className="w-4 h-4 mr-2" />
             <span>Update Profile</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate("/update/password")} className="hover:cursor-pointer">
+          <DropdownMenuItem
+            onClick={() => navigate("/update/password")}
+            className="hover:cursor-pointer"
+          >
             <Key className="w-4 h-4 mr-2" />
             <span>Update Password</span>
           </DropdownMenuItem>

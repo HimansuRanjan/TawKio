@@ -1,6 +1,6 @@
 import './App.css'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { ToastContainer } from 'react-toastify'
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
+import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 import HomePage from './pages/HomePage'
 import Login from './pages/Login'
@@ -12,8 +12,26 @@ import ViewPostComment from './pages/ViewPostComment'
 import Profile from './pages/Profile';
 import HomeFeed from './pages/HomeFeed';
 import Signup from './pages/SignUp';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from './store/store';
+import { useEffect } from 'react';
+import { clearAllUserErrors, getUser } from './store/slices/userSlice';
 
 function App() {
+
+  const dispatch = useDispatch<AppDispatch>();
+  // const navigateTo = useNavigate();
+
+  // const {isAuthenticated, loading, error} = useSelector(
+  //   (state: RootState) => state.user
+  // )
+
+  useEffect(()=>{
+    dispatch(getUser());
+    // dispatch()
+  },[]);
+
+
   return (
     <>
      <Router>
