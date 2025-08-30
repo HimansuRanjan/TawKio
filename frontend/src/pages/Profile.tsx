@@ -3,7 +3,8 @@ import Navbar from "./sub-components/Navbar";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getPostsByUser } from "@/store/slices/postSlice";
+import { clearAllPostErrors, getPostsByUser } from "@/store/slices/postSlice";
+import { toast } from "react-toastify";
 
 export default function Profile() {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
@@ -11,13 +12,17 @@ export default function Profile() {
 
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.user);
-  const { posts } = useSelector((state: RootState) => state.post);
+  const { posts, postError, loading, message} = useSelector((state: RootState) => state.post);
 
   useEffect(() => {
     if (user?.id) {
       dispatch(getPostsByUser(user.id));
     }
-  }, [user?.id, dispatch]);
+    if(postError){
+      toast.error(postError);
+      dispatch(clearAllPostErrors());
+    }
+  }, [user?.id, dispatch, postError]);
 
   return (
     <div className="min-h-screen bg-gray-100">

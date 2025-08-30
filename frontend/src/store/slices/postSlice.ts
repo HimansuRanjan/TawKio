@@ -1,15 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { AppDispatch } from "../store";
+import { Post } from "@/types/posts";
 
-interface Post {
-  id: string;
-  content: string;
-  imageUrl?: string | null;
-  linkUrl?: string | null;
-  comments: any[];
-  likes: any[];
-}
 
 interface PostState {
   loading: boolean;
@@ -163,6 +156,22 @@ export const getPostsByUser = (id:string) => async (dispatch:AppDispatch): Promi
         });
 
     dispatch(postSlice.actions.getAllPostSuccess(data.posts));
+    dispatch(postSlice.actions.clearAllErrors());  
+    } catch (error: any) {
+    dispatch(postSlice.actions.getAllPostFailed(error.response.data.message));    
+    }
+};
+
+export const getPostsById = (id:string) => async (dispatch:AppDispatch): Promise<void> => {
+    dispatch(postSlice.actions.getAllPostRequest());
+    try {
+        const { data } = await axios.get(`http://localhost:4000/v.1/api/post${id}`,
+        {
+            // params: { page: pageToLoad, limit },
+            withCredentials: true
+        });
+
+    dispatch(postSlice.actions.getAllPostSuccess(data.post));
     dispatch(postSlice.actions.clearAllErrors());  
     } catch (error: any) {
     dispatch(postSlice.actions.getAllPostFailed(error.response.data.message));    

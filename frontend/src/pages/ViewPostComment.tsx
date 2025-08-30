@@ -2,26 +2,37 @@ import Navbar from "./sub-components/Navbar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { MoreHorizontal, Heart, MessageCircle, Share2 } from "lucide-react";
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { clearAllPostErrors, getPostsById } from "@/store/slices/postSlice";
+import { toast } from "react-toastify";
+import { Post } from "@/types/posts";
 
 export default function ViewPostComment() {
   const { id } = useParams<{ id: string }>();
-  const [comments, setComments] = useState([
-    { id: 1, user: "Alice", text: "Nice post!" },
-    { id: 2, user: "Bob", text: "Looks great 🔥" },
-    { id: 3, user: "Charlie", text: "Waiting for more content 🚀" },
-  ]);
 
-  // Dummy post data (replace with backend later)
-  const post = {
-    id,
-    user: { name: "Himansu Ranjan Patra", avatar: "banner.png" },
-    timestamp: "2 hours ago",
-    content: "This is my post content — building TawKio 🚀",
-    image: "banner.png",
-    likes: 42,
-    comments: 12,
-  };
+  const dispatch = useDispatch<AppDispatch>();
+  const {posts, postError, loading, message} = useSelector((state: RootState) => state.post);
+
+  const [post, setPost] = useState<Post | null>(null);
+
+  useEffect(() => {
+    if(id){
+      dispatch(getPostsById(id));
+      setPost(posts[0]);
+    }
+
+    if(postError){
+      toast.error(postError);
+      dispatch(clearAllPostErrors());
+    }
+
+    if(message){
+      toast.success(message)
+    }
+  }, [posts, id, postError, message, loading]);
+
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -32,12 +43,12 @@ export default function ViewPostComment() {
         <div className="flex justify-between items-center">
           <div className="flex gap-3 items-center">
             <Avatar>
-              <AvatarImage src={post.user.avatar} alt={post.user.name} />
-              <AvatarFallback>{post.user.name[0]}</AvatarFallback>
+              <AvatarImage src={post?.imageUrl || "banner.png"} alt={post?.author.username} />
+              <AvatarFallback>{post?.author.username}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-semibold">{post.user.name}</p>
-              <span className="text-xs text-gray-500">{post.timestamp}</span>
+              <p className="font-semibold">{post?.author.username}</p>
+              <span className="text-xs text-gray-500">{post?.createdAt}</span>
             </div>
           </div>
           <button
@@ -50,10 +61,10 @@ export default function ViewPostComment() {
         </div>
 
         {/* Content */}
-        <p className="mt-3 text-gray-800 text-sm">{post.content}</p>
-        {post.image && (
+        <p className="mt-3 text-gray-800 text-sm">{post?.content}</p>
+        {post?.imageUrl && (
           <img
-            src={post.image}
+            src={post.imageUrl}
             alt="Post"
             className="mt-3 rounded-lg max-h-96 w-full object-cover"
           />
@@ -66,14 +77,14 @@ export default function ViewPostComment() {
             aria-label="Like this post"
             className="flex items-center gap-2 hover:text-red-500"
           >
-            <Heart className="w-5 h-5" /> {post.likes}
+            <Heart className="w-5 h-5" /> {post?.likes.length}
           </button>
           <button
             type="button"
             aria-label="View comments"
             className="flex items-center gap-2 hover:text-blue-500"
           >
-            <MessageCircle className="w-5 h-5" /> {post.comments}
+            <MessageCircle className="w-5 h-5" /> {post?.comments.length}
           </button>
           <button
             type="button"
@@ -89,14 +100,14 @@ export default function ViewPostComment() {
       <div className="max-w-2xl mx-auto mt-4 bg-white shadow rounded-xl p-4">
         <h3 className="text-md font-semibold mb-3 text-gray-700">Comments</h3>
         <div className="space-y-3">
-          {comments.map((c) => (
-            <div key={c.id} className="flex gap-3 items-start">
+          {post?.comments.map((comment) => (
+            <div key={comment.id} className="flex gap-3 items-start">
               <Avatar className="w-8 h-8">
-                <AvatarFallback>{c.user[0]}</AvatarFallback>
+                <AvatarFallback>{comment.authorId}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-sm font-medium">{c.user}</p>
-                <p className="text-sm text-gray-600">{c.text}</p>
+                <p className="text-sm font-medium">{comment.author.username}</p>
+                <p className="text-sm text-gray-600">{comment.content}</p>
               </div>
             </div>
           ))}
