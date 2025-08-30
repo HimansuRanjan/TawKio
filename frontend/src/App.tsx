@@ -11,6 +11,7 @@ import ResetPassword from './pages/ResetPassword'
 import ViewPostComment from './pages/ViewPostComment'
 import Profile from './pages/Profile';
 import HomeFeed from './pages/HomeFeed';
+import Signup from './pages/SignUp';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path='/feed' element={<HomeFeed/>}/>
         <Route path='/profile' element={<Profile/>}/>
         <Route path='/login' element={<Login/>}/>
+        <Route path='/signup' element={<Signup/>}/>
         <Route path='/view/post/:id' element={<ViewPostComment/>}/>
         <Route path='/update/profile' element={<UpdateProfile/>}/>
         <Route path='/update/password' element={<UpdatePassword/>}/>
