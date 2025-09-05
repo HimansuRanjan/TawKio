@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Github, Mail } from "lucide-react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { toast } from "react-toastify";
+import { clearAllUserErrors } from "@/store/slices/userSlice";
 
 const testimonials = [
   {
@@ -29,6 +33,17 @@ const testimonials = [
 ];
 
 const HomePage = () => {
+
+  const navigateTo = useNavigate();
+
+  const {isAuthenticated, error} = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(()=>{
+    if(isAuthenticated){
+      navigateTo("/feed");
+    }
+  },[isAuthenticated])
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-violet-700 via-blue-600 to-violet-900 text-white flex flex-col">
       {/* Navbar */}
@@ -56,8 +71,7 @@ const HomePage = () => {
 
       {/* Hero Section */}
       <section
-        className="h-screen flex flex-col items-center justify-center text-center px-6 bg-cover bg-center relative"
-        style={{ backgroundImage: "url('/banner.png')" }}
+        className="h-screen flex flex-col items-center justify-center text-center px-6 bg-cover bg-center relative bg-[url('/banner.png')]"
       >
         {/* Overlay for readability */}
         <div className="absolute inset-0 bg-gradient-to-br from-violet-900/70 via-blue-800/60 to-violet-900/70"></div>

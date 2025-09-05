@@ -39,6 +39,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
+    
     if (error) {
       toast.error(error);
       dispatch(clearAllUserErrors());
@@ -46,7 +47,6 @@ const Login = () => {
     if (isAuthenticated) {
       navigate("/feed"); // redirect after login
       toast.success("Login successful!");
-      console.log(user);
     }
   }, [error, isAuthenticated, navigate, dispatch]);
 
@@ -82,6 +82,7 @@ const Login = () => {
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
+                  autoComplete="password"
                   className="bg-white/20 border-white/30 rounded-full text-white placeholder-gray-300 pr-10"
                   {...register("password")}
                 />

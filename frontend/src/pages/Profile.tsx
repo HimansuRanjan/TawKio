@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { clearAllPostErrors, getPostsByUser } from "@/store/slices/postSlice";
 import { toast } from "react-toastify";
+import { Button } from "@/components/ui/button";
 
 export default function Profile() {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
@@ -12,17 +13,22 @@ export default function Profile() {
 
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.user);
-  const { posts, postError, loading, message} = useSelector((state: RootState) => state.post);
+  const { posts, postError } = useSelector((state: RootState) => state.post);
 
   useEffect(() => {
     if (user?.id) {
       dispatch(getPostsByUser(user.id));
     }
-    if(postError){
-      toast.error(postError);
+  }, [user?.id, dispatch]);
+
+  useEffect(() => {
+    if (postError) {
+      if (postError !== "Post not found") {
+        toast.error(postError);
+      }
       dispatch(clearAllPostErrors());
     }
-  }, [user?.id, dispatch, postError]);
+  }, [postError, dispatch]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -30,33 +36,50 @@ export default function Profile() {
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Profile Header */}
-        <div className="flex items-center gap-6 mb-8">
-          <img
-            src={user.avatarUrl}
-            alt={user.username}
-            className="w-28 h-28 rounded-full object-cover cursor-pointer"
-            onClick={() => setShowAvatarModal(true)}
-          />
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">
-              {user.username}
-            </h2>
-            <p className="text-gray-600 mt-2">{user.bio}</p>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-6">
+            <img
+              src={user.avatarUrl ? user.avatarUrl : "user.jpg"}
+              alt={user.username}
+              className="w-28 h-28 rounded-full object-cover cursor-pointer"
+              onClick={() => setShowAvatarModal(true)}
+            />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">
+                {user.username}
+              </h2>
+              <p className="text-gray-600 mt-2">{user.bio}</p>
+            </div>
           </div>
+
+          {/* Add Post Button */}
+          <Button
+            onClick={() => navigate("/profile/addPost")}
+            className="bg-violet-600 text-white hover:bg-violet-700"
+          >
+            Add Post
+          </Button>
         </div>
 
-        {/* Photos Grid */}
-        <div className="grid grid-cols-3 gap-2">
-          {posts.map((post) => (
-            <img
-              key={post.id}
-              src={post.imageUrl || "banner.png"}
-              alt="Post"
-              className="w-full h-40 object-cover cursor-pointer hover:opacity-90"
-              onClick={() => navigate(`/view/post/${post.id}`)}
-            />
-          ))}
-        </div>
+        {/* Posts Section */}
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">Posts</h3>
+        <hr className="border-gray-300 mb-4" />
+
+        {posts.length === 0 ? (
+          <p className="text-gray-500 text-center">No posts yet</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-2">
+            {posts.map((post) => (
+              <img
+                key={post.id}
+                src={post.imageUrl || "banner.png"}
+                alt="Post"
+                className="w-full h-40 object-cover cursor-pointer hover:opacity-90"
+                onClick={() => navigate(`/view/post/${post.id}`)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Avatar Modal */}

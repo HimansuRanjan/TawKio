@@ -1,81 +1,91 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { AppDispatch } from "../store";
+import { Comment } from "@/types/comment";
+
+interface CommentState {
+  commentLoading: boolean;
+  comments: Comment[];  // ✅ typed array
+  commentError: string | null;
+  commentMessage: string | null;
+}
+
+const initialState: CommentState = {
+  commentLoading: false,
+  comments: [],
+  commentError: null,
+  commentMessage: null,
+};
 
 const commentSlice = createSlice({
   name: "comment",
-  initialState: {
-    loading: false,
-    comments: [],
-    error: null,
-    message: null,
-  },
+  initialState,
   reducers: {
     getCommentRequest(state){
-        state.loading = true;
+        state.commentLoading = true;
         state.comments = [];
-        state.error = null;
+        state.commentError = null;
     },
     getCommentSuccess(state, action){
-        state.loading = false;
+        state.commentLoading = false;
         state.comments = action.payload;
-        state.error = null;
+        state.commentError = null;
     },
     getCommentFailed(state, action){
-        state.loading = false;
+        state.commentLoading = false;
         state.comments = state.comments;
-        state.error = action.payload;
+        state.commentError = action.payload;
     },
     deleteCommentRequest(state){
-        state.message = null;
-        state.loading = true;
-        state.error = null;
+        state.commentMessage = null;
+        state.commentLoading = true;
+        state.commentError = null;
     },
     deleteCommentSuccess(state, action){
-        state.loading = false;
-        state.message = action.payload;
-        state.error = null;
+        state.commentLoading = false;
+        state.commentMessage = action.payload;
+        state.commentError = null;
     },
     deleteCommentFailed(state, action){
-        state.loading = false;
-        state.message = null;
-        state.error = action.payload;
+        state.commentLoading = false;
+        state.commentMessage = null;
+        state.commentError = action.payload;
     },
     addCommentRequest(state){
-        state.message = null;
-        state.loading = true;
-        state.error = null;
+        state.commentMessage = null;
+        state.commentLoading = true;
+        state.commentError = null;
     },
     addCommentSuccess(state, action){
-        state.loading = false;
-        state.message = action.payload;
-        state.error = null;
+        state.commentLoading = false;
+        state.commentMessage = action.payload;
+        state.commentError = null;
     },
     addCommentFailed(state, action){
-        state.loading = false;
-        state.message = null;
-        state.error = action.payload;
+        state.commentLoading = false;
+        state.commentMessage = null;
+        state.commentError = action.payload;
     },
 
     resetCommentSlice(state){
-      state.error = null;
+      state.commentError = null;
       state.comments = state.comments;
-      state.message = null;
-      state.loading = false;
+      state.commentMessage = null;
+      state.commentLoading = false;
     },
 
     clearAllErrors(state) {
-      state.error = null;
+      state.commentError = null;
       state.comments = state.comments;
     },
   }
 });
 
-export const addNewComment = (id: string, text: string, authorName: string) => async (dispatch: AppDispatch): Promise<void> => {
+export const addNewComment = (postId: string, content: string) => async (dispatch: AppDispatch): Promise<void> => {
     dispatch(commentSlice.actions.addCommentRequest());
     try {
-        const { data } = await axios.post(`http://localhost:4000/v.1/api/comment/add/${id}`, {
-            text, authorName
+        const { data } = await axios.post(`http://localhost:4000/v.1/api/comment/posts/${postId}/comments`, {
+            content
         },
         {
             withCredentials: true,

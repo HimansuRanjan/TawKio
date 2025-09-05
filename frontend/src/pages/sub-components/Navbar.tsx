@@ -100,7 +100,7 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
           >
             <Avatar>
               <AvatarImage src={user.avatarUrl} alt="Profile" />
-              <AvatarFallback>U</AvatarFallback>
+              <AvatarFallback>{user.username ? user.username[0] : ""}</AvatarFallback>
             </Avatar>
           </button>
         </DropdownMenuTrigger>
