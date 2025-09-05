@@ -54,7 +54,7 @@ function App() {
         <Route path='/update/profile' element={<UpdateProfile/>}/>
         <Route path='/update/password' element={<UpdatePassword/>}/>
         <Route path='/password/forgot' element={<ForgotPassword/>}/>
-        <Route path='/password/reset/:token' element={<ResetPassword/>}/>
+        <Route path='/reset/password/:token' element={<ResetPassword/>}/>
 
       </Routes>
      </Router>

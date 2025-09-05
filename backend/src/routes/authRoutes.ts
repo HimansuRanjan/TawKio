@@ -29,7 +29,7 @@ router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);
 
 // Reset Password (token in URL)
-router.post("/reset-password/:token", resetPassword);
+router.put("/reset-password/:token", resetPassword);
 
 // ========================
 // Protected Routes (Require Authentication)

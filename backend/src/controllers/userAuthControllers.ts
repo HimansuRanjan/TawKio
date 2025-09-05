@@ -246,7 +246,7 @@ export const forgotPassword = catchAsyncErrors(
         .status(200)
         .json({
           success: true,
-          message: `Email sent to ${user.email} successfully!`,
+          message: `Reset Password Email sent to ${user.email} successfully!`,
         });
     } catch (error: any) {
       await prisma.user.update({
