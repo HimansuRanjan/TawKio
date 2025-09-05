@@ -12,8 +12,10 @@ import likeRoutes from "./routes/likeRoutes";
 
 dotenv.config();
 
+const app_url = process.env.APP_URL;
+
 const app = express();
-app.use(cors({ origin: ["http://localhost:5173"], credentials: true }));
+app.use(cors({ origin: [`${app_url}`], credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
