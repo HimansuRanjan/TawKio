@@ -51,7 +51,7 @@ const forgotPasswordSlice = createSlice({
 export const forgotPassword = (email: string) => async (dispatch: AppDispatch): Promise<void>=>{
     dispatch(forgotPasswordSlice.actions.forgotPasswordRequest());
     try {
-        const {data} = await axios.post("http://localhost:4000/v.1/api/user/forgot-password", {
+        const {data} = await axios.post("https://tawkio-backend.onrender.com/v.1/api/user/forgot-password", {
             email,
         },
     {
@@ -74,7 +74,7 @@ export const resetPassword = (token: string | undefined, password: string, confi
     
     dispatch(forgotPasswordSlice.actions.resetPasswordRequest());
     try {
-        const { data } = await axios.put(`http://localhost:4000/v.1/api/user/reset-password/${token}`, {password, confirmPassword},{
+        const { data } = await axios.put(`https://tawkio-backend.onrender.com/v.1/api/user/reset-password/${token}`, {password, confirmPassword},{
             withCredentials: true,
             headers: {"Content-Type": "application/json"}
         });

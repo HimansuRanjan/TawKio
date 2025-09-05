@@ -154,7 +154,7 @@ const userSlice = createSlice({
 export const signUp = (username:string, email: String, password: String) => async (dispatch: AppDispatch): Promise<void> => {
     dispatch(userSlice.actions.signUpRequest());
     try {
-        const { data } = await axios.post("http://localhost:4000/v.1/api/user/signup",
+        const { data } = await axios.post("https://tawkio-backend.onrender.com/v.1/api/user/signup",
             {username, email, password},
             {
                 'withCredentials': true,
@@ -172,7 +172,7 @@ export const signUp = (username:string, email: String, password: String) => asyn
 export const login = (email: String, password: String) => async (dispatch: AppDispatch): Promise<void> => {
     dispatch(userSlice.actions.loginRequest());
     try {
-        const { data } = await axios.post("http://localhost:4000/v.1/api/user/login",
+        const { data } = await axios.post("https://tawkio-backend.onrender.com/v.1/api/user/login",
             {email, password},
             {
                 'withCredentials': true,
@@ -190,7 +190,7 @@ export const login = (email: String, password: String) => async (dispatch: AppDi
 export const logout = () => async (dispatch: AppDispatch): Promise<void> =>{
     try {
     const { data } = await axios.get(
-      "http://localhost:4000/v.1/api/user/logout",
+      "https://tawkio-backend.onrender.com/v.1/api/user/logout",
       {
         withCredentials: true
       }
@@ -205,7 +205,7 @@ export const logout = () => async (dispatch: AppDispatch): Promise<void> =>{
 export const getUser = () => async (dispatch: AppDispatch): Promise<void> => {
   dispatch(userSlice.actions.loadUserRequest());
   try {
-    const { data } = await axios.get("http://localhost:4000/v.1/api/user/me", {
+    const { data } = await axios.get("https://tawkio-backend.onrender.com/v.1/api/user/me", {
       withCredentials: true,
     });
     dispatch(userSlice.actions.loadUserSuccess(data.user));
@@ -221,7 +221,7 @@ export const updateProfile =
     dispatch(userSlice.actions.updateProfileRequest());
     try {
       const { data } = await axios.put(
-        "http://localhost:4000/v.1/api/user/me/update",
+        "https://tawkio-backend.onrender.com/v.1/api/user/me/update",
         formData,
         {
           withCredentials: true,
@@ -240,7 +240,7 @@ export const chnagePassword =
   (currentPassword: string, newPassword: string, confirmNewPassword: string) => async (dispatch: AppDispatch): Promise<void> => {
     dispatch(userSlice.actions.updatePasswordRequest())
     try {
-        const {data} = await axios.put("http://localhost:4000/v.1/api/user/me/change-password", {currentPassword, newPassword, confirmNewPassword},
+        const {data} = await axios.put("https://tawkio-backend.onrender.com/v.1/api/user/me/change-password", {currentPassword, newPassword, confirmNewPassword},
            {
             withCredentials: true,
             headers: {"Content-Type": "application/json"}

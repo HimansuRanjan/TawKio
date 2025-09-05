@@ -143,7 +143,7 @@ export const addNewPost =
     dispatch(postSlice.actions.addPostRequest());
     try {
       const { data } = await axios.post(
-        "http://localhost:4000/v.1/api/post/new",
+        "https://tawkio-backend.onrender.com/v.1/api/post/new",
         formData,
         {
           withCredentials: true,
@@ -164,7 +164,7 @@ export const addNewPost =
 //     dispatch(postSlice.actions.getAllPostRequest());
 //     try {
 //       const { data } = await axios.get(
-//         "http://localhost:4000/v.1/api/post/get/all",
+//         "https://tawkio-backend.onrender.com/v.1/api/post/get/all",
 //         {
 //           params: { page: pageToLoad, limit },
 //           withCredentials: true,
@@ -186,7 +186,7 @@ export const getAllPosts =
     dispatch(postSlice.actions.getAllPostRequest({ cursor }));
 
     try {
-      const { data } = await axios.get("http://localhost:4000/v.1/api/post/all", {
+      const { data } = await axios.get("https://tawkio-backend.onrender.com/v.1/api/post/all", {
         params: { cursor, limit },
         withCredentials: true,
       });
@@ -210,7 +210,7 @@ export const getAllPosts =
 export const getPostsByUser = (id:string) => async (dispatch:AppDispatch): Promise<void> => {
     dispatch(postSlice.actions.getAllPostRequest(undefined));
     try {
-        const { data } = await axios.get(`http://localhost:4000/v.1/api/post/user/${id}`,
+        const { data } = await axios.get(`https://tawkio-backend.onrender.com/v.1/api/post/user/${id}`,
         {
             // params: { page: pageToLoad, limit },
             withCredentials: true
@@ -231,7 +231,7 @@ export const getPostsById =
     dispatch(postSlice.actions.getAllPostRequest(undefined));
     try {
       const { data } = await axios.get(
-        `http://localhost:4000/v.1/api/post/${id}`,
+        `https://tawkio-backend.onrender.com/v.1/api/post/${id}`,
         { withCredentials: true }
       );
 
@@ -253,7 +253,7 @@ export const updatePost =
     dispatch(postSlice.actions.updatePostRequest());
     try {
       const { data } = await axios.put(
-        `http://localhost:4000/v.1/api/post/${id}`,
+        `https://tawkio-backend.onrender.com/v.1/api/post/${id}`,
         formData,
         {
           withCredentials: true,
@@ -274,7 +274,7 @@ export const deletePost =
     dispatch(postSlice.actions.deletePostRequest());
     try {
       const { data } = await axios.delete(
-        `http://localhost:4000/v.1/api/post/${id}`,
+        `https://tawkio-backend.onrender.com/v.1/api/post/${id}`,
         {
           withCredentials: true,
         }
@@ -293,7 +293,7 @@ export const likePost =
     dispatch(postSlice.actions.likePostRequest());
     try {
       const { data } = await axios.post(
-        `http://localhost:4000/v.1/api/like/post/${id}`,
+        `https://tawkio-backend.onrender.com/v.1/api/like/post/${id}`,
         {},
         {
           withCredentials: true,
