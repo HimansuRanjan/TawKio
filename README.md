@@ -47,7 +47,7 @@ cd backend
 npm install
 npm run dev
 ```
-Your backend will be running at http://localhost:5173
+Your backend will be running at http://localhost:4000
 
 ### 3️⃣ Frontend Setup
 
@@ -57,7 +57,7 @@ npm install
 npm run dev
 ```
 
-Your app will be running at http://localhost:4000
+Your app will be running at http://localhost:5173
 
 ### 🗄️ Database Setup
 
