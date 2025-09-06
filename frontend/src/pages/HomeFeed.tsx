@@ -7,7 +7,7 @@ import Profile from "./Profile";
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store/store';
 import { useEffect } from 'react';
-import { clearAllUserErrors } from '../store/slices/userSlice';
+import { clearAllUserErrors, getUser } from '../store/slices/userSlice';
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -17,11 +17,13 @@ export default function HomeFeed() {
     const dispatch = useDispatch<AppDispatch>();
   const navigateTo = useNavigate();
 
-  const {isAuthenticated, loading, error} = useSelector(
+  const {isAuthenticated, loading, error,user} = useSelector(
     (state: RootState) => state.user
   )
 
   useEffect(()=>{
+    // dispatch(getUser());
+
     if(error){
       toast.error(error);
       dispatch(clearAllUserErrors());

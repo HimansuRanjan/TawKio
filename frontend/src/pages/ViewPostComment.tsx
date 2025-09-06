@@ -33,10 +33,10 @@ export default function ViewPostComment() {
 
   const navigateTo = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { posts, postError, loading, message } = useSelector(
+
+  const { posts, postError, message } = useSelector(
     (state: RootState) => state.post
   );
-
   const { commentError, commentLoading, commentMessage } = useSelector(
     (state: RootState) => state.comment
   );

@@ -11,7 +11,7 @@ export default function Feed() {
   );
 
   useEffect(() => {
-    if (posts.length === 0) {
+    if (posts?.length === 0) {
       dispatch(getAllPosts(undefined, 5)); // fetch initial posts
     }
   }, [dispatch]);
@@ -29,15 +29,17 @@ export default function Feed() {
       )}
 
       {/* Posts */}
-      {posts.map((post) => (
+      {posts && posts.map((post) => (
         <PostCard
           key={post.id}
+          postId={post.id}
           user={{name:post.author.username || "", avatar: post.author.avatarUrl || ""}}
           content={post.content}
           image={post.imageUrl || ""}
           timestamp={post.createdAt}
           likes={post.likes.length}
           comments={post.comments.length}
+          
         />
       ))}
 

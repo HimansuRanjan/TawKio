@@ -3,6 +3,8 @@ import axios from "axios";
 import type { AppDispatch } from "../store";
 import { Comment } from "@/types/comment";
 
+const app_url = import.meta.env.VITE_SERVER_URL || "";
+
 interface CommentState {
   commentLoading: boolean;
   comments: Comment[];  // ✅ typed array
@@ -84,7 +86,7 @@ const commentSlice = createSlice({
 export const addNewComment = (postId: string, content: string) => async (dispatch: AppDispatch): Promise<void> => {
     dispatch(commentSlice.actions.addCommentRequest());
     try {
-        const { data } = await axios.post(`https://tawkio-backend.onrender.com/v.1/api/comment/posts/${postId}/comments`, {
+        const { data } = await axios.post(`${app_url}/v.1/api/comment/posts/${postId}/comments`, {
             content
         },
         {
@@ -102,7 +104,7 @@ export const addNewComment = (postId: string, content: string) => async (dispatc
 export const getComments = (id: string) => async (dispatch:AppDispatch): Promise<void> => {
     dispatch(commentSlice.actions.getCommentRequest());
     try {
-        const { data } = await axios.get(`https://tawkio-backend.onrender.com/v.1/api/comment/get/all/${id}`,
+        const { data } = await axios.get(`${app_url}/v.1/api/comment/get/all/${id}`,
         {
             withCredentials: true
         });
@@ -117,7 +119,7 @@ export const getComments = (id: string) => async (dispatch:AppDispatch): Promise
 export const deleteComment = (id:string) => async (dispatch: AppDispatch):Promise<void> => {
     dispatch(commentSlice.actions.deleteCommentRequest());
     try {
-        const { data } = await axios.delete(`https://tawkio-backend.onrender.com/v.1/api/comment/delete/${id}`,
+        const { data } = await axios.delete(`${app_url}/v.1/api/comment/delete/${id}`,
         {
             withCredentials: true
         });

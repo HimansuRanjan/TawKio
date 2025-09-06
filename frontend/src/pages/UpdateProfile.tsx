@@ -38,13 +38,17 @@ export default function UpdateProfile() {
     dispatch(updateProfile(formData)); // avatar handled by backend if required
   };
 
-  // ✅ Handle success & errors
-  useEffect(() => {
-    if(user){
+  useEffect(()=>{
+    console.log(user)
+     if(user){
       setName(user.username || "");
       setEmail(user.email || "");
       setBio(user.bio || "");
     }
+  },[user,isUpdated])
+
+  // ✅ Handle success & errors
+  useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearAllUserErrors());
@@ -58,7 +62,7 @@ export default function UpdateProfile() {
         URL.revokeObjectURL(URL.createObjectURL(avatar));
       }
     };
-  }, [error, message, isUpdated, loading, avatar,user]);
+  }, [error, message, isUpdated, loading, avatar]);
 
   return (
     <div className="min-h-screen bg-gray-100">

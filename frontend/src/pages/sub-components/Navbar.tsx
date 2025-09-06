@@ -99,8 +99,8 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
             className="rounded-full overflow-hidden w-10 h-10"
           >
             <Avatar>
-              <AvatarImage src={user.avatarUrl} alt="Profile" />
-              <AvatarFallback>{user.username ? user.username[0] : ""}</AvatarFallback>
+              <AvatarImage src={user?.avatarUrl || "user.jpg"} alt="Profile" />
+              <AvatarFallback>{user?.username ? user.username[0] : ""}</AvatarFallback>
             </Avatar>
           </button>
         </DropdownMenuTrigger>

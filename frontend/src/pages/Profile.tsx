@@ -39,16 +39,16 @@ export default function Profile() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-6">
             <img
-              src={user.avatarUrl ? user.avatarUrl : "user.jpg"}
-              alt={user.username}
+              src={user?.avatarUrl ? user.avatarUrl : "user.jpg"}
+              alt={user?.username}
               className="w-28 h-28 rounded-full object-cover cursor-pointer"
               onClick={() => setShowAvatarModal(true)}
             />
             <div>
               <h2 className="text-2xl font-bold text-gray-800">
-                {user.username}
+                {user?.username}
               </h2>
-              <p className="text-gray-600 mt-2">{user.bio}</p>
+              <p className="text-gray-600 mt-2">{user?.bio}</p>
             </div>
           </div>
 
@@ -65,11 +65,11 @@ export default function Profile() {
         <h3 className="text-lg font-semibold text-gray-800 mb-2">Posts</h3>
         <hr className="border-gray-300 mb-4" />
 
-        {posts.length === 0 ? (
+        {posts?.length === 0 ? (
           <p className="text-gray-500 text-center">No posts yet</p>
         ) : (
           <div className="grid grid-cols-3 gap-2">
-            {posts.map((post) => (
+            {posts?.map((post) => (
               <img
                 key={post.id}
                 src={post.imageUrl || "banner.png"}
