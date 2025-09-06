@@ -47,6 +47,7 @@ cd backend
 npm install
 npm run dev
 ```
+Your backend will be running at http://localhost:5173
 
 ### 3️⃣ Frontend Setup
 
@@ -56,7 +57,7 @@ npm install
 npm run dev
 ```
 
-Your app will be running at http://localhost:5173
+Your app will be running at http://localhost:4000
 
 ### 🗄️ Database Setup
 
@@ -81,6 +82,11 @@ Copy the connection string
 Paste it into backend/.env
 
 ### 🔑 Environment Variables
+Frontend → frontend/.env
+```bash
+VITE_SERVER_URL=http://localhost:4000
+```
+
 Backend → backend/.env
 ```bash
 DATABASE_URL=your_postgres_connection_string
@@ -106,6 +112,8 @@ SMTP_PASSWORD=smtp_password
 
 APP_URL=http://localhost:5173
 ```
+
+
 ### 🛠️ Development Workflow
 
 Run backend → npm run dev
