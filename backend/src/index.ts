@@ -1,6 +1,10 @@
 import app from "./app";
+import { createServer } from "http";
 import { v2 as cloudinary } from "cloudinary";
+import dotenv from 'dotenv';
+import { initSocket } from "./socket";
 
+dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 cloudinary.config({
@@ -9,6 +13,12 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
 
-app.listen(PORT, () => {
+//Create http server form expressApp
+const server = createServer(app);
+
+const io = initSocket(server);//add socket to server
+
+
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

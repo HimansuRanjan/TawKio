@@ -11,7 +11,7 @@ export interface userType{
   id: string;
   username: string;  
   email: string;
-  avatarId:  string | null;
+  avatarId:  string | null;   
   avatarUrl: string| null;
   password: string;
 }

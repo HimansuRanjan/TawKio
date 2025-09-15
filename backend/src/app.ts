@@ -9,6 +9,8 @@ import userRoutes from "./routes/authRoutes";
 import postRoutes from "./routes/postRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import likeRoutes from "./routes/likeRoutes";
+import messageRoutes from "./routes/messageRoutes";
+import conversationRoutes from "./routes/conversationRoutes";
 
 dotenv.config();
 
@@ -29,6 +31,9 @@ app.use("/v.1/api/user", userRoutes);
 app.use("/v.1/api/post", postRoutes);
 app.use("/v.1/api/comment", commentRoutes);
 app.use("/v.1/api/like", likeRoutes);
+app.use("/v.1/api/messages", messageRoutes);
+app.use("/v.1/api/conversations", conversationRoutes);
+
 
 app.use(errorMiddleware);
 
