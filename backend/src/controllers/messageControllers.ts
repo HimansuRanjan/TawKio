@@ -9,7 +9,7 @@ export const getMessages = catchAsyncErrors(
         const userId = req.user?.id;
 
         if(!conversationId){
-            return next(new Error("Conversation ID is required"));
+            return next(new Error("Conversation ID NotFound!"));
         }
 
         const messages = await prisma.message.findMany({

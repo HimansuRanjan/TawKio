@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import PostCard from "./PostCard";
 import { AppDispatch, RootState } from "@/store/store";
 import { getAllPosts } from "@/store/slices/postSlice";
+import Loader from "@/components/Loader";
 
 export default function Feed() {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,7 +20,7 @@ export default function Feed() {
   return (
     <div className="max-w-2xl mx-auto py-6 space-y-6 bg-gray-100 min-h-screen">
       {/* Loading */}
-      {loading && <p className="text-center text-gray-500">Loading posts...</p>}
+      {loading && <Loader/>}
 
       {/* Error */}
       {postError && (
@@ -33,7 +34,7 @@ export default function Feed() {
         <PostCard
           key={post.id}
           postId={post.id}
-          user={{name:post.author.username || "", avatar: post.author.avatarUrl || ""}}
+          user={{id:post.author.id || "", name:post.author.username || "", avatar: post.author.avatarUrl || ""}}
           content={post.content}
           image={post.imageUrl || ""}
           timestamp={post.createdAt}

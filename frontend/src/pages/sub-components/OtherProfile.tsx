@@ -1,5 +1,5 @@
 import { AppDispatch, RootState } from "@/store/store";
-import Navbar from "./sub-components/Navbar";
+import Navbar from "./Navbar";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -7,20 +7,54 @@ import { clearAllPostErrors, getPostsByUser } from "@/store/slices/postSlice";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { useParams } from "react-router-dom";
+import axios from "axios";
+import { createConversation } from "@/store/slices/messageSlice";
 
-export default function Profile() {
+const app_url = import.meta.env.VITE_SERVER_URL || "";
+
+interface UserProfile {
+  id: string;
+  username: string;
+  avatarUrl: string;
+  bio: string;
+}
+
+export default function OtherProfile() {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
   const navigate = useNavigate();
+
+  const { userId } = useParams<{ userId: string }>();
 
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.user);
-  const { posts, postError} = useSelector((state: RootState) => state.post);
+  const { posts, postError } = useSelector((state: RootState) => state.post);
+  const { messageStatus } = useSelector((state: RootState) => state.message);
 
   useEffect(() => {
-    if (user?.id) {
-      dispatch(getPostsByUser(user.id));
+    // Redirect if user clicks on their own profile
+    if (user?.id === userId) {
+      navigate("/profile");
+      return;
     }
-  }, [user?.id, dispatch]);
+
+    // Fetch user data
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`${app_url}/v.1/api/user/${userId}`, {
+          withCredentials: true, // send cookies/credentials
+        });
+        setProfileUser(response.data.user);
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
+    };
+
+    if (userId) {
+      fetchUser();
+      dispatch(getPostsByUser(userId));
+    }
+  }, [user?.id, userId, dispatch, navigate]);
 
   useEffect(() => {
     if (postError) {
@@ -31,6 +65,18 @@ export default function Profile() {
     }
   }, [postError, dispatch]);
 
+  const handleMessageClick = async (userId:string) => {
+    try {
+      // create a new conversation with the other user
+      await dispatch(createConversation([userId]));
+      
+      // redirect to chat window for this conversation
+      navigate(`/messages/${userId}`);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar activeTab="profile" setActiveTab={() => {}} />
@@ -40,25 +86,25 @@ export default function Profile() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-6">
             <img
-              src={user?.avatarUrl ? user.avatarUrl : "user.jpg"}
-              alt={user?.username}
+              src={profileUser?.avatarUrl ? profileUser.avatarUrl : "user.jpg"}
+              alt={profileUser?.username}
               className="w-28 h-28 rounded-full object-cover cursor-pointer"
               onClick={() => setShowAvatarModal(true)}
             />
             <div>
               <h2 className="text-2xl font-bold text-gray-800">
-                {user?.username}
+                {profileUser?.username}
               </h2>
-              <p className="text-gray-600 mt-2">{user?.bio}</p>
+              <p className="text-gray-600 mt-2">{profileUser?.bio}</p>
             </div>
           </div>
 
           {/* Add Post Button */}
           <Button
-            onClick={() => navigate("/profile/addPost")}
+            onClick={() => handleMessageClick(profileUser?.id || "")}
             className="bg-violet-600 text-white hover:bg-violet-700"
           >
-            Add Post
+            Message
           </Button>
         </div>
 

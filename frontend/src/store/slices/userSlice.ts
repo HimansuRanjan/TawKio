@@ -218,6 +218,19 @@ export const getUser = () => async (dispatch: AppDispatch): Promise<void> => {
   }
 };
 
+// export const getUserById = (userId: string) => async (dispatch: AppDispatch): Promise<void> => {
+//   dispatch(userSlice.actions.loadUserRequest());
+//   try {
+//     const { data } = await axios.get(`${app_url}/v.1/api/user/me`, {
+//       withCredentials: true,
+//     });
+//     dispatch(userSlice.actions.loadUserSuccess(data.user));
+//     dispatch(userSlice.actions.clearAllErrors());
+//   } catch (error: any) {
+//     dispatch(userSlice.actions.loadUserFailed(error.response.data.message));
+//   }
+// };
+
 
 export const updateProfile =
   (formData: FormData) => async (dispatch: AppDispatch): Promise<void> => {

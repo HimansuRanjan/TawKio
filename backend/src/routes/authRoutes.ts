@@ -11,6 +11,7 @@ import {
   forgotPassword,
   resetPassword,
   deleteUser,
+  getUserByID,
 } from "../controllers/userAuthControllers";
 
 const router = express.Router();
@@ -41,6 +42,9 @@ router.get("/logout", logoutUser);
 
 // Get current logged-in user
 router.get("/me", getUser);
+
+// get user By Id
+router.get("/:userId", getUserByID)
 
 // Update profile
 router.put("/me/update", updateProfile);

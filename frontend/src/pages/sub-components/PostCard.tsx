@@ -16,10 +16,11 @@ import { AppDispatch, RootState } from "@/store/store";
 import { clearAllPostErrors, likePost } from "@/store/slices/postSlice";
 import { toast } from "react-toastify";
 import { addNewComment, clearAllCommentErrors } from "@/store/slices/commentSlice";
+import { useNavigate } from "react-router-dom";
 
 interface PostCardProps {
   postId: string;
-  user: { name: string; avatar: string };
+  user: { id:string, name: string; avatar: string };
   content: string;
   image?: string;
   timestamp: string;
@@ -47,6 +48,8 @@ export default function PostCard({
   const dispatch = useDispatch<AppDispatch>();
   const { postError, message } = useSelector((state: RootState) => state.post);
   const {commentError, commentMessage, commentLoading} = useSelector((state: RootState) => state.comment)
+
+  const navigateTo = useNavigate();
 
   // Close menus on outside click
   useEffect(() => {
@@ -114,11 +117,16 @@ export default function PostCard({
     }
   };
 
+  const handleProfileClick = () =>{
+    navigateTo(`/profile/${user.id}`);
+  }
+
   return (
     <div className="bg-white shadow rounded-xl p-4 mb-4">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center hover:cursor-pointer"
+        onClick={handleProfileClick}>
           <Avatar>
             <AvatarImage src={user.avatar || "user.jpg"} alt={user.name} />
             <AvatarFallback>{user.name?.[0]}</AvatarFallback>

@@ -27,8 +27,8 @@ export const generateToken = (
           (Number(process.env.COOKIE_EXPIRES || 7) * 24 * 60 * 60 * 1000)
       ),
       httpOnly: true,
-      sameSite: "none",
-      secure: true, // only works on HTTPS
+      sameSite: "lax",
+      secure: false, // only works on HTTPS
     })
     .json({
       success: true,

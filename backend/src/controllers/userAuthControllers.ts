@@ -20,6 +20,7 @@ import crypto from 'crypto';
 import { generateResetToken } from "../utils/generateResetToken";
 import { sendEmail } from "../utils/sendEmail";
 import { UploadedFile } from "express-fileupload";
+import { id } from "zod/v4/locales/index.cjs";
 
 
 
@@ -168,6 +169,31 @@ export const getUser = catchAsyncErrors(
     .json({ 
       success: true, 
       user: req.user 
+    });
+  }
+);
+
+// ✅ Get User By Id
+export const getUserByID = catchAsyncErrors(
+  async (req: Request, res: Response, next:NextFunction) => {
+
+    const userId = req.params.userId;
+    
+    if(!userId){
+      return next(new ErrorHandler("User Id not found", 404));
+    }
+    const user = await prisma.user.findUnique({
+      where: {id: userId}
+    });
+
+    if(!user){
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    res.status(200)
+    .json({ 
+      success: true, 
+      user
     });
   }
 );
