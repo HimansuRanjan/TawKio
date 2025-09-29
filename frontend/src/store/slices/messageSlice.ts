@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { AppDispatch } from "../store";
 import type { Conversation, Message } from "../../types/message";
@@ -7,16 +7,16 @@ const app_url = import.meta.env.VITE_SERVER_URL || "";
 
 interface MessageState {
   messageLoading: boolean;
-  conversations: Conversation[];
-  selectedConversation: Conversation | null;
+  messages: Message[];
+  conversation: Conversation | null;
   messageError: string | null;
   messageStatus: string | null;
 }
 
 const initialState: MessageState = {
   messageLoading: false,
-  conversations: [],
-  selectedConversation: null,
+  messages: [],
+  conversation: null,
   messageError: null,
   messageStatus: null,
 };
@@ -25,82 +25,130 @@ const messageSlice = createSlice({
   name: "message",
   initialState,
   reducers: {
-    // Fetch Conversations
-    getConversationsRequest(state) {
+    // Fetch All Messages for a Conversations
+    getMessagesRequest(state) {
       state.messageLoading = true;
-      state.conversations = [];
+      state.messages = [];
       state.messageError = null;
     },
-    getConversationsSuccess(state, action) {
+    getMessagesSuccess(state, action) {
       state.messageLoading = false;
-      state.conversations = action.payload;
+      state.messages = action.payload;
       state.messageError = null;
+      // If a conversation is selected and matches these messages' conversationId,
+      // update conversation.messages as well.
+      // if (state.conversation?.id) {
+      //   // replace conversation.messages if the fetched messages belong to it
+      //   // (we assume the API returned the messages for the selected conversation)
+      //   state.conversation.messages = action.payload || [];
+      // }
     },
-    getConversationsFailed(state, action) {
+    getMessagesFailed(state, action) {
       state.messageLoading = false;
-      state.conversations = state.conversations;
       state.messageError = action.payload;
     },
 
-    // Select Conversation
+    // Select Messages
     selectConversation(state, action) {
-      state.selectedConversation = action.payload;
+      state.conversation = action.payload;
+      // Also set messages to conversation.messages if present
+      state.messages = action.payload?.messages ? [...action.payload.messages] : [];
     },
 
-    // Send Message
+    // Optimistic send (UI update before confirmation)
+    sendMessageOptimistic(state, action: PayloadAction<Message>) {
+      state.messages.push(action.payload);
+    },
+
+    // Send Message (optimistic)
     sendMessageRequest(state) {
       state.messageLoading = true;
       state.messageError = null;
       state.messageStatus = null;
     },
-    sendMessageSuccess(state, action) {
-      state.messageLoading = false;
-      state.messageStatus = action.payload; // e.g., "Message sent"
-      state.messageError = null;
-      if (state.selectedConversation) {
-        state.selectedConversation.messages.push(action.payload);
-      }
-    },
+
+    // sendMessageSuccess(state, action) {
+    //   state.messageLoading = false;
+    //   state.messageStatus = "Message sent";
+    //   state.messageError = null;
+
+    //   const msg: Message = action.payload;
+
+    //   // Update selected conversation messages
+    //   if (state.conversation?.id === msg.conversationId) {
+    //     state.conversation.messages.push(msg);
+    //   }
+
+    //   // Update conversation list lastMessage
+    //   const conv = state.conversations.find(c => c.id === msg.conversationId);
+    //   if (conv) {
+    //     conv.messages.push(msg);
+    //     conv.lastMessage = msg;
+    //     conv.lastMessageAt = msg.createdAt;
+    //   } else {
+    //     // If conversation not found, add placeholder
+    //     state.conversations.unshift({
+    //       id: msg.conversationId,
+    //       isGroup: false,
+    //       createdAt: new Date().toISOString(),
+    //       participants: [],
+    //       messages: [msg],
+    //       lastMessage: msg,
+    //       lastMessageAt: msg.createdAt,
+    //     });
+    //   }
+    // },
     sendMessageFailed(state, action) {
       state.messageLoading = false;
       state.messageError = action.payload;
       state.messageStatus = null;
     },
 
-    // Receive Message (real-time via socket)
-    receiveMessage(state, action) {
-      const incoming: Message = action.payload;
-      const conv = state.conversations.find(c => c.id === incoming.conversationId);
-      if (conv) {
-        conv.messages.push(incoming);
-        conv.lastMessage = incoming;
-        conv.lastMessageAt = incoming.createdAt;
-      } else {
-        // If conversation not found, optionally add new conversation placeholder
-        state.conversations.unshift({
-          id: incoming.conversationId,
-          isGroup: false,
-          createdAt: new Date().toISOString(),
-          participants: [],
-          messages: [incoming],
-          lastMessage: incoming,
-          lastMessageAt: incoming.createdAt,
-        });
-      }
-      if (state.selectedConversation?.id === incoming.conversationId) {
-        state.selectedConversation.messages.push(incoming);
+    // // Receive real-time messages
+    // receiveMessage(state, action) {
+    //   const msg: Message = action.payload;
+
+    //   // Update selected conversation if it matches
+    //   if (state.conversation?.id === msg.conversationId) {
+    //     state.conversation.messages.push(msg);
+    //   }
+
+    //   // Update conversation list
+    //   const conv = state.conversations.find(c => c.id === msg.conversationId);
+    //   if (conv) {
+    //     conv.messages.push(msg);
+    //     conv.lastMessage = msg;
+    //     conv.lastMessageAt = msg.createdAt;
+    //   } else {
+    //     state.conversations.unshift({
+    //       id: msg.conversationId,
+    //       isGroup: false,
+    //       createdAt: new Date().toISOString(),
+    //       participants: [],
+    //       messages: [msg],
+    //       lastMessage: msg,
+    //       lastMessageAt: msg.createdAt,
+    //     });
+    //   }
+    // },
+
+      // Receive new message via socket
+    receiveMessage(state, action: PayloadAction<Message>) {
+      const msg = action.payload;
+      if (state.conversation?.id === msg.conversationId) {
+        state.messages.push(msg);
       }
     },
 
     resetMessageSlice(state) {
       state.messageLoading = false;
-      state.conversations = [];
-      state.selectedConversation = null;
+      state.messages = [];
+      state.conversation = null;
       state.messageError = null;
       state.messageStatus = null;
     },
 
-    clearAllErrors(state) {
+    clearAllMessageErrors(state) {
       state.messageError = null;
       state.messageStatus = null;
     },
@@ -109,63 +157,54 @@ const messageSlice = createSlice({
 
 // Async Thunks
 
-export const fetchConversations = () => async (dispatch: AppDispatch) => {
-  dispatch(messageSlice.actions.getConversationsRequest());
-  try {
-    const { data } = await axios.get(`${app_url}/v.1/api/conversations`, {
-      withCredentials: true,
-    });
-    dispatch(messageSlice.actions.getConversationsSuccess(data.conversations));
-    dispatch(messageSlice.actions.clearAllErrors());
-  } catch (error: any) {
-    dispatch(messageSlice.actions.getConversationsFailed(error.response?.data?.message || "Failed to fetch conversations"));
-  }
-};
+// Load old messages via REST
+export const fetchMessages =
+  (conversationId: string) => async (dispatch: AppDispatch) => {
+    dispatch(messageSlice.actions.getMessagesRequest());
+    try {
+      const { data } = await axios.get(
+        `${app_url}/v.1/api/messages/${conversationId}`,
+        { withCredentials: true }
+      );
+      dispatch(messageSlice.actions.getMessagesSuccess(data.messages));
+    } catch (error: any) {
+      dispatch(
+        messageSlice.actions.getMessagesFailed(
+          error.response?.data?.message || "Failed to fetch messages"
+        )
+      );
+    }
+  };
 
-export const sendNewMessage = (conversationId: string, content: string) => async (dispatch: AppDispatch) => {
-  dispatch(messageSlice.actions.sendMessageRequest());
-  try {
-    const { data } = await axios.post(
-      `${app_url}/v.1/api/message/send`,
-      { conversationId, content },
-      { withCredentials: true, headers: { "Content-Type": "application/json" } }
-    );
-    dispatch(messageSlice.actions.sendMessageSuccess(data.message));
-    dispatch(messageSlice.actions.clearAllErrors());
-  } catch (error: any) {
-    dispatch(messageSlice.actions.sendMessageFailed(error.response?.data?.message || "Failed to send message"));
-  }
-};
 
-export const createConversation = (participantIds: string[]) => async (dispatch: AppDispatch, getState: () => any) => {
-  try {
-    const { data } = await axios.post(
-      `${app_url}/v.1/api/conversations`,
-      { participantIds },
-      { withCredentials: true }
-    );
-
-    // Select the newly created conversation
-    dispatch(selectConversation(data.conversation));
-
-    // Add to existing conversations
-    const { conversations } = getState().message;
-    dispatch(messageSlice.actions.getConversationsSuccess([
-      data.conversation,
-      ...conversations
-    ]));
-
-  } catch (error: any) {
-    dispatch(messageSlice.actions.getConversationsFailed(
-      error.response?.data?.message || "Failed to create conversation"
-    ));
-  }
-};
+// export const sendNewMessage =
+//   (conversationId: string, content: string) => async (dispatch: AppDispatch) => {
+//     dispatch(messageSlice.actions.sendMessageRequest());
+//     try {
+//       const { data } = await axios.post(
+//         `${app_url}/v.1/api/message/send`,
+//         { conversationId, content },
+//         { withCredentials: true, headers: { "Content-Type": "application/json" } }
+//       );
+//       dispatch(messageSlice.actions.sendMessageSuccess(data.message));
+//       dispatch(messageSlice.actions.clearAllMessageErrors());
+//     } catch (error: any) {
+//       dispatch(
+//         messageSlice.actions.sendMessageFailed(
+//           error.response?.data?.message || "Failed to send message"
+//         )
+//       );
+//     }
+//   };
 
 
 
-
-// Slice Exports
-export const { selectConversation, receiveMessage, resetMessageSlice, clearAllErrors } = messageSlice.actions;
+// Slice exports
+export const {
+  selectConversation,
+  receiveMessage,
+  resetMessageSlice,
+  clearAllMessageErrors,
+} = messageSlice.actions;
 
 export default messageSlice.reducer;

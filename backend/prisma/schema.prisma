@@ -81,13 +81,16 @@ model Conversation {
   id            String      @id @default(uuid())
   isGroup       Boolean     @default(false)
   createdAt     DateTime    @default(now())
-  lastMessageAt DateTime?
+  lastMessageAt DateTime?   @default(now())
 
   lastMessageId String?    @unique // ✅ must be unique
   lastMessage   Message?    @relation("LastMessage", fields: [lastMessageId], references: [id])
 
   participants  User[]      @relation("UserConversations")
   messages      Message[]   @relation("ConversationMessages")
+
+  // ✅ NEW FIELD
+  participantHash String?     @unique
 }
 
 model Message {
@@ -107,6 +110,8 @@ model Message {
 
   // 👇 opposite field for "LastMessage" relation
   isLastMessageOf Conversation? @relation("LastMessage")
+
+
 }
 
 enum MessageStatus {

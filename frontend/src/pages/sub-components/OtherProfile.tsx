@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { createConversation } from "@/store/slices/messageSlice";
+import { createConversation } from "@/store/slices/conversationSlice";
 
 const app_url = import.meta.env.VITE_SERVER_URL || "";
 
@@ -30,6 +30,7 @@ export default function OtherProfile() {
   const { user } = useSelector((state: RootState) => state.user);
   const { posts, postError } = useSelector((state: RootState) => state.post);
   const { messageStatus } = useSelector((state: RootState) => state.message);
+  const { selectedConversation } = useSelector((state: RootState) => state.conversation);
 
   useEffect(() => {
     // Redirect if user clicks on their own profile
@@ -65,13 +66,17 @@ export default function OtherProfile() {
     }
   }, [postError, dispatch]);
 
-  const handleMessageClick = async (userId:string) => {
+  const handleMessageClick = async (userId: string) => {
     try {
       // create a new conversation with the other user
       await dispatch(createConversation([userId]));
-      
+
       // redirect to chat window for this conversation
-      navigate(`/messages/${userId}`);
+      // navigate(`/messages/${userId}`);
+      if (selectedConversation) {
+        console.log(selectedConversation);
+        navigate(`/messages/${selectedConversation.id}`);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -86,7 +91,7 @@ export default function OtherProfile() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-6">
             <img
-              src={profileUser?.avatarUrl ? profileUser.avatarUrl : "user.jpg"}
+              src={profileUser?.avatarUrl || "/user.jpg"}
               alt={profileUser?.username}
               className="w-28 h-28 rounded-full object-cover cursor-pointer"
               onClick={() => setShowAvatarModal(true)}
@@ -149,8 +154,8 @@ export default function OtherProfile() {
 
             {/* Enlarged Avatar */}
             <img
-              src={user.avatarUrl}
-              alt={user.username}
+              src={profileUser!.avatarUrl || "/user.jpg"}
+              alt={profileUser!.username}
               className="max-w-[90vw] max-h-[80vh] rounded-lg object-contain"
             />
           </div>

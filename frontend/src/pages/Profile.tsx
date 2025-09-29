@@ -40,7 +40,7 @@ export default function Profile() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-6">
             <img
-              src={user?.avatarUrl ? user.avatarUrl : "user.jpg"}
+              src={user?.avatarUrl ? user.avatarUrl : "/user.jpg"}
               alt={user?.username}
               className="w-28 h-28 rounded-full object-cover cursor-pointer"
               onClick={() => setShowAvatarModal(true)}
@@ -103,7 +103,7 @@ export default function Profile() {
 
             {/* Enlarged Avatar */}
             <img
-              src={user.avatarUrl}
+              src={user.avatarUrl || "/user.jpg"}
               alt={user.username}
               className="max-w-[90vw] max-h-[80vh] rounded-lg object-contain"
             />

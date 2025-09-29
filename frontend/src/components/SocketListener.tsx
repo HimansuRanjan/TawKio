@@ -24,11 +24,11 @@ export default function SocketListener() {
     
     console.log("Socket connected as user:", user.id);
 
-    // Listen for incoming messages globally
-    socket.on("message:receive", (msg) => {
-      console.log("New message received via SocketListener:", msg);
-      dispatch(receiveMessage(msg));
-    });
+    // // Listen for incoming messages globally
+    // socket.on("message:receive", (msg) => {
+    //   console.log("New message received via SocketListener:", msg);
+    //   dispatch(receiveMessage(msg));
+    // });
 
     return () => {
       socket.off("message:receive");

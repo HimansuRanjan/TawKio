@@ -1,11 +1,16 @@
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-import cookie from "cookie";
+// import cookie from "cookie";
+import * as cookieLib from "cookie";
 import prisma from "../config/db";
 
 interface SocketData {
   userId: string;
 }
+
+// universal safe parser
+const cookieParser: any =
+  (cookieLib as any).parse || (cookieLib as any).default?.parse;
 
 export const initSocket = (server: any) => {
   const io = new Server(server, {
@@ -21,16 +26,14 @@ export const initSocket = (server: any) => {
 
   io.use(async (socket: Socket, next) => {
     try {
-      console.log("Handshake headers.cookie:", socket.handshake.headers.cookie); // 👈 add this
-      const cookies = cookie.parse(socket.handshake.headers.cookie || "");
+      // console.log("Handshake headers.cookie:", socket.handshake.headers.cookie); // 👈 add this
+      // cookies = cookie.parse(socket.handshake.headers.cookie || "");
+      const cookies = cookieParser(socket.handshake.headers.cookie || "");
       const token = cookies.token; // 👈 your JWT cookie name
-      console.log("Token:", token);
-      if (!token) return next(new Error("Authentication error"));
-
-      console.log("User Found");
-
-      const payload: any = jwt.verify(token, process.env.JWT_SECRET!);
+      // console.log("token: ", token);
+      const payload: any = jwt.verify(token, process.env.JWT_SECRET_KEY!);
       socket.data.userId = payload.id;
+      // console.log("payload: ", payload);
       next();
     } catch (err) {
       next(new Error("Authentication error"));
@@ -48,10 +51,12 @@ export const initSocket = (server: any) => {
     });
 
     socket.on("message:send", async (data) => {
-      console.log("Message Send");
       const { conversationId, content, type } = data;
       const userId = socket.data.userId;
 
+      console.log("Send Message");
+
+      // Save message to DB
       const message = await prisma.message.create({
         data: {
           content,
@@ -59,31 +64,47 @@ export const initSocket = (server: any) => {
           conversationId,
           senderId: userId,
         },
+        include: { sender: true }, // include sender info to show avatar/name
       });
 
+      // Update conversation last_message & last_message_at
+      const conv = await prisma.conversation.update({
+        where: { id: conversationId },
+        data: {
+          lastMessageAt: new Date(Date.now()),
+          lastMessageId: message.id,
+        },
+      });
+
+      // Emit to all users in this conversation room, including sender
       io.to(conversationId).emit("message:receive", message);
+      console.log("Message Broadcasted!");
     });
 
-    // Example for call signaling
-    socket.on("call:initiate", (data) => {
-      const { conversationId, offer } = data;
-      socket
-        .to(conversationId)
-        .emit("call:incoming", { from: socket.data.userId, offer });
+    // WebRTC call signaling
+
+    // 1. Initiate a call (send offer)
+    socket.on("call:initiate", ({ conversationId, offer }) => {
+      socket.to(conversationId).emit("call:incoming", {
+        from: socket.data.userId,
+        offer,
+      });
     });
 
-    socket.on("call:answer", (data) => {
-      const { conversationId, answer } = data;
-      socket
-        .to(conversationId)
-        .emit("call:answered", { from: socket.data.userId, answer });
+    // 2. Answer a call (send answer)
+    socket.on("call:answer", ({ conversationId, answer }) => {
+      socket.to(conversationId).emit("call:answered", {
+        from: socket.data.userId,
+        answer,
+      });
     });
 
-    socket.on("call:candidate", (data) => {
-      const { conversationId, candidate } = data;
-      socket
-        .to(conversationId)
-        .emit("call:candidate", { from: socket.data.userId, candidate });
+    // 3. ICE candidates
+    socket.on("call:candidate", ({ conversationId, candidate }) => {
+      socket.to(conversationId).emit("call:candidate", {
+        from: socket.data.userId,
+        candidate,
+      });
     });
 
     socket.on("disconnect", () => {

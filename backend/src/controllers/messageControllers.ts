@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import { catchAsyncErrors } from "../middlewares/catchAsyncError";
 import { AuthenticatedRequest } from "../../types/express";
 import prisma from "../config/db";

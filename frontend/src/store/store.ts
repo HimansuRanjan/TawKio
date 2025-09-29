@@ -4,6 +4,7 @@ import postReducer from "./slices/postSlice"
 import commentReducer from "./slices/commentSlice"
 import forgotPasswordReducer from "./slices/forgotPasswordSlice"
 import messageReducer from "./slices/messageSlice"
+import conversationReducer from "./slices/conversationSlice"
 
 export const store = configureStore({
     reducer:{
@@ -11,7 +12,8 @@ export const store = configureStore({
         post: postReducer,
         comment: commentReducer,
         forgotPassword: forgotPasswordReducer,
-        message: messageReducer
+        message: messageReducer,
+        conversation: conversationReducer
     }
 })
 
