@@ -23,7 +23,7 @@ interface UserState {
 }
 
 const initialState: UserState = {
-  loading: false,
+  loading: true,
   user: {},              // empty at start but typed as Partial<User>
   isAuthenticated: false,
   error: null,

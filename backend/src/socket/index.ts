@@ -62,7 +62,7 @@ export const initSocket = (server: any) => {
 
       await prisma.conversation.update({
         where: { id: conversationId },
-        data: { lastMessageAt: new Date(), lastMessageId: message.id },
+        data: { lastMessageAt: message.createdAt, lastMessageId: message.id },
       });
 
       io.to(conversationId).emit("message:receive", message);
