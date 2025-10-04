@@ -1,6 +1,5 @@
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-// import cookie from "cookie";
 import * as cookieLib from "cookie";
 import prisma from "../config/db";
 
@@ -26,14 +25,10 @@ export const initSocket = (server: any) => {
 
   io.use(async (socket: Socket, next) => {
     try {
-      // console.log("Handshake headers.cookie:", socket.handshake.headers.cookie); // 👈 add this
-      // cookies = cookie.parse(socket.handshake.headers.cookie || "");
       const cookies = cookieParser(socket.handshake.headers.cookie || "");
-      const token = cookies.token; // 👈 your JWT cookie name
-      // console.log("token: ", token);
+      const token = cookies.token;
       const payload: any = jwt.verify(token, process.env.JWT_SECRET_KEY!);
       socket.data.userId = payload.id;
-      // console.log("payload: ", payload);
       next();
     } catch (err) {
       next(new Error("Authentication error"));
@@ -54,8 +49,6 @@ export const initSocket = (server: any) => {
       const { conversationId, content, type } = data;
       const userId = socket.data.userId;
 
-      console.log("Send Message");
-
       // Save message to DB
       const message = await prisma.message.create({
         data: {
@@ -64,51 +57,66 @@ export const initSocket = (server: any) => {
           conversationId,
           senderId: userId,
         },
-        include: { sender: true }, // include sender info to show avatar/name
+        include: { sender: true },
       });
 
-      // Update conversation last_message & last_message_at
-      const conv = await prisma.conversation.update({
+      await prisma.conversation.update({
         where: { id: conversationId },
-        data: {
-          lastMessageAt: new Date(Date.now()),
-          lastMessageId: message.id,
-        },
+        data: { lastMessageAt: new Date(), lastMessageId: message.id },
       });
 
-      // Emit to all users in this conversation room, including sender
       io.to(conversationId).emit("message:receive", message);
-      console.log("Message Broadcasted!");
     });
 
-    // WebRTC call signaling
+    // --- WebRTC Call Signaling ---
 
-    // 1. Initiate a call (send offer)
-    socket.on("call:initiate", ({ conversationId, offer }) => {
+    // 1. Caller starts ringing
+    socket.on("call:ringing", ({ conversationId, isVideo }) => {
+      socket.to(conversationId).emit("call:ringing", {
+        fromUserId: socket.data.userId,
+        isVideo,
+      });
+    });
+
+    // 2. Callee accepts → notify caller to initiate offer
+    socket.on("call:accepted", ({ conversationId, toUserId, isVideo }) => {
+      socket.to(conversationId).emit("call:accepted", {
+        fromUserId: socket.data.userId,
+        toUserId,
+        isVideo,
+      });
+    });
+
+    // 3. Caller sends offer → only to callee
+    socket.on("call:initiate", ({ conversationId, offer, toUserId, isVideo }) => {
       socket.to(conversationId).emit("call:incoming", {
-        from: socket.data.userId,
+        fromUserId: socket.data.userId,
         offer,
+        isVideo,
       });
     });
 
-    // 2. Answer a call (send answer)
+    // 4. Callee sends answer
     socket.on("call:answer", ({ conversationId, answer }) => {
-      socket.to(conversationId).emit("call:answered", {
-        from: socket.data.userId,
-        answer,
-      });
+      socket.to(conversationId).emit("call:answered", { answer });
     });
 
-    // 3. ICE candidates
+    // 5. Reject call
+    socket.on("call:reject", ({ conversationId }) => {
+      socket.to(conversationId).emit("call:rejected", { fromUserId: socket.data.userId });
+    });
+
+    // 6. ICE candidates
     socket.on("call:candidate", ({ conversationId, candidate }) => {
       socket.to(conversationId).emit("call:candidate", {
-        from: socket.data.userId,
+        fromUserId: socket.data.userId,
         candidate,
       });
     });
 
-    socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.data.userId);
+    // 7. End call
+    socket.on("call:end", ({ conversationId }) => {
+      socket.to(conversationId).emit("call:end", { fromUserId: socket.data.userId });
     });
   });
 
